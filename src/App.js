@@ -3,14 +3,50 @@ import {useEffect, useState} from 'react'
 import './App.css';
 import getService from './services/getservice';
 import postService from './services/postservice'
-import { sampleUser } from './user';
+import { sampleUser, sampleUserErrorMsgs } from './user';
 import axios from 'axios';
 
 
 function App() {
   axios.defaults.baseURL ="http://54.202.218.249:9501"
   const [user,setUser] =  useState( {...sampleUser})
+  const [userError,setUserError] =  useState( {...sampleUser,code:"",phone1:"",phone2:""})
+  const [phone,setPhone] = useState({code:"",phone1:"",phone2:""})
   const [table, setTable] =useState([])
+  const validateEmail=(e)=>{
+    var validator = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+    if (!validator.test(e.target.value)) {
+setUserError({
+  ...userError,
+  "email":sampleUserErrorMsgs["email"]
+})
+    }else{
+      setUserError({
+        ...userError,
+        "email":""
+      })
+    }
+  }
+  const validateValue=(e)=>{
+    console.log(e.target.value.length<1)
+    if(e.target.name=="email"){
+      validateEmail(e)
+    }else{
+      if(e.target.value.length<1){
+        
+        setUserError({
+          ...userError,
+          [e.target.name]:sampleUserErrorMsgs[e.target.name]
+        })
+      }else{
+        setUserError({
+          ...userError,
+          [e.target.name]:""
+        })
+      }
+    }
+  }
   useEffect(()=>{
     getService('api/users').then((res)=>{
       console.log(res)
@@ -18,6 +54,7 @@ function App() {
     })
   },[])
   const onInput=(e)=>{
+    validateValue(e)
     setUser({
       ...user,
       [e.target.name]:e.target.value
@@ -45,11 +82,16 @@ name="firstName"
 onChange={onInput}
 value={user.firstName} 
  type="text"  class="input-name" placeholder="First" />
+ 
                           <input 
 name="lastName"
 onChange={onInput}
 value={user.lastName} 
 type="text" class="input-name" placeholder="Last" />
+<span style={{color:'red',border:"none"}}  >{userError.firstName}</span>
+{"     "}
+<span style={{color:'red',border:"none",marginLeft:"10%"}}>{userError.lastName}</span>
+<br/>
    					    </div>                        
                     </div>
                     <div class="clearfix"></div>
@@ -60,6 +102,7 @@ type="text" class="input-name" placeholder="Last" />
 name="email"
 onChange={onInput}
 value={user.email} type="text" class="form-register text" id="" placeholder="E-mail" />
+<span style={{color:'red'}}  >{userError.email}</span>
                     </div>
                     <div class="clearfix"></div>
                     
@@ -68,24 +111,91 @@ value={user.email} type="text" class="form-register text" id="" placeholder="E-m
                     	<div class="clearfix"></div>
                        <div class="wsite-form">
 							<input 
-name="phoneNumber"
-onChange={onInput}
-value={user.phoneNumber} type="text" class="text input-name1" />
+
+onChange={(e)=>{
+  if(e.target.value<99){
+    setUserError({
+      ...userError,
+      code:sampleUserErrorMsgs["code"]
+    })
+  }else{
+    setUserError({
+      ...userError,
+      code:""
+    })
+    
+  }
+  if(e.target.value<=99){
+    setPhone({
+      ...phone,
+      code:e.target.value
+    })
+  }
+ 
+}}
+value={phone.code} type="number"  class="text input-name1" />
 					   </div>
                        <div class="line">-</div>
                        <div class="wsite-form">
 							<input 
-name="address1"
-onChange={onInput}
-value={user.address1} type="text" class="text input-name1" />
+
+onChange={(e)=>{
+  if(e.target.value<=9999){
+    setUserError({
+      ...userError,
+      phone1:sampleUserErrorMsgs["phone1"]
+    })
+  }else{
+    setUserError({
+      ...userError,
+      phone1:""
+    })
+    
+  }
+  if(e.target.value<=99999){
+    setPhone({
+      ...phone,
+      phone1:e.target.value
+    })
+  }
+  
+}}
+value={phone.phone1} type="number" max={5} class="text input-name1" />
+
+
 					   </div>
+
                        <div class="line">-</div>
                        <div class="wsite-form">
 							<input 
-name="address2"
-onChange={onInput}
-value={user.address2} type="text" class="text input-name1" />
+
+onChange={(e)=>{
+  if(e.target.value<=99999){
+    setUserError({
+      ...userError,
+      phone2:sampleUserErrorMsgs["phone2"]
+    })
+  }else{
+    setUserError({
+      ...userError,
+      phone2:""
+    })       
+  }
+  if(e.target.value<=99999){
+    setPhone({
+      ...phone,
+      phone2:e.target.value
+    })
+  }
+ 
+}}
+value={phone.phone2} type="number" max={5} class="text input-name1" />
 					   </div>
+             <span style={{color:"red"}}>{userError.code}</span>
+    
+<span style={{color:"red",marginLeft:"7%"}}>{userError.phone1}</span>
+
+<span style={{color:"red",marginLeft:"13%"}}>{userError.phone2}</span>
                        
                     </div>
                     
